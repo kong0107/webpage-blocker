@@ -1,0 +1,31 @@
+{
+    "manifest_version": 2,
+    "name": "Website Blocker",
+    "version": "1.0.0",
+    "description": "block webpages by URLs user assigned",
+    "author": "kong0107",
+    "icons" : {
+        "128": "icon.png"
+    },
+    "browser_action": {
+        "default_icon": "icon.png"
+    },
+    "permissions": [
+        "storage",
+        "webRequest",
+        "webRequestBlocking",
+        "*://*/*"
+    ],
+    "options_ui": {
+        "page": "options.html",
+        "open_in_tab": true
+    },
+    "background": {
+        "scripts": [
+            "node_modules/url-match-pattern/index.js",
+            "browser.js",
+            "background.js"
+        ],
+        "persistent": true
+    }
+}
