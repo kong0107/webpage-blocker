@@ -6,7 +6,9 @@
  */
 function onBeforeRequestListener(details) {
     console.debug("onBeforeRequest", details.url);
-    return window.whitelist.some(pattern => pattern.test(details.url))
+    if(window.whitelist.some(pattern => pattern.test(details.url))) return {cancel: false};
+
+    return confirm("This URL is blocked and not in whitelist.\nSure to go?")
         ? {cancel: false}
         : {redirectUrl: proxy.runtime.getURL("options.html")}
     ;

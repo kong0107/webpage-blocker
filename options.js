@@ -1,12 +1,15 @@
 "use strict";
 
-function arrangePatternList(str) {
-    return str
+function arrangePatternList(selector) {
+    return $(selector).value
         .split("\n")
         .map(s => s.trim())
         .filter(p => URLMatchPattern.test(p))
-        .join("\n")
     ;
+}
+
+function setResult(text = "") {
+    $("#testResult").textContent = text;
 }
 
 $("#saveButton").disabled = true;
@@ -32,8 +35,8 @@ $("#saveButton").addEventListener("click", () => {
     $("#whitelist").disabled = true;
     $("#saveButton").disabled = true;
 
-    $("#blocklist").value = arrangePatternList($("#blocklist").value);
-    $("#whitelist").value = arrangePatternList($("#whitelist").value);
+    $("#blocklist").value = arrangePatternList("#blocklist").join("\n");
+    $("#whitelist").value = arrangePatternList("#whitelist").join("\n");
 
     setData({
         blocklist: $("#blocklist").value,
@@ -51,41 +54,25 @@ $("#saveButton").addEventListener("click", () => {
 $("#testInput").addEventListener("input", urlTest);
 
 function urlTest() {
-    let url, result;
-    try {
-        url = new URL($("#testInput").value);
-    }
-    catch(e) {
-        $("#testResult").textContent = "invalid url";
-        return;
-    }
+    let result;
+    let url = $("#testInput").value.trim();
 
-    const blocklist = $("#blocklist").value;
-    if(!blocklist) {
-        $("#testResult").textContent = "no blocklist";
-        return;
-    }
+    if(!url) return setResult();
 
-    blocklist.split("\n").some(pattern => {
+    try      { url = new URL(url); }
+    catch(e) { return setResult("invalid url"); }
+
+    arrangePatternList("#blocklist").some(pattern => {
         if(!URLMatchPattern.test(pattern, url)) return false;
         result = "blocked by " + pattern;
         return true;
     });
-    if(!result) {
-        $("#testResult").textContent = "not blocked";
-        return;
-    }
+    if(!result) return setResult("not blocked");
 
-    const whitelist = $("#whitelist").value;
-    if(!whitelist) {
-        $("#testResult").textContent = result;
-        return;
-    }
-
-    whitelist.split("\n").some(pattern => {
+    arrangePatternList("#whitelist").some(pattern => {
         if(!URLMatchPattern.test(pattern, url)) return false;
         result = "allowed by " + pattern;
         return true;
     });
-    $("#testResult").textContent = result;
+    setResult(result);
 }
