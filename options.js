@@ -1,23 +1,12 @@
 "use strict";
 
-function arrangePatternList(selector) {
-    return $(selector).value
-        .split("\n")
-        .map(s => s.trim())
-        .filter(p => URLMatchPattern.test(p))
-    ;
-}
-
-function setResult(text = "") {
-    $("#testResult").textContent = text;
-}
-
 $("#saveButton").disabled = true;
 
 getData({blocklist: "", whitelist: ""})
 .then(storage => {
     $("#blocklist").value = storage.blocklist;
     $("#whitelist").value = storage.whitelist;
+    urlTest();
 });
 
 $("#blocklist").addEventListener("input", () => {
@@ -53,6 +42,17 @@ $("#saveButton").addEventListener("click", () => {
 
 $("#testInput").addEventListener("input", urlTest);
 
+try {
+    $("#testInput").value = (new URL(document.location)).searchParams.get("testURL");
+    $("#testInput").focus();
+}
+catch(e) {}
+
+
+/*****
+ * Functions
+ */
+
 function urlTest() {
     let result;
     let url = $("#testInput").value.trim();
@@ -75,4 +75,16 @@ function urlTest() {
         return true;
     });
     setResult(result);
+}
+
+function arrangePatternList(selector) {
+    return $(selector).value
+        .split("\n")
+        .map(s => s.trim())
+        .filter(p => URLMatchPattern.test(p))
+    ;
+}
+
+function setResult(text = "") {
+    $("#testResult").textContent = text;
 }
