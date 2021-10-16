@@ -1,18 +1,44 @@
 "use strict";
 
 /**
- * Listener
- * @param {object} details
+ * Variables
  */
-function onBeforeRequestListener(details) {
-    console.debug("onBeforeRequest", details.url);
-    if(window.whitelist.some(pattern => pattern.test(details.url))) return {cancel: false};
 
-    return confirm("This URL is blocked and not in whitelist.\nSure to go?")
-        ? {cancel: false}
-        : {redirectUrl: proxy.runtime.getURL("options.html")}
-    ;
-}
+const requestFilter = {urls: [], types: ["main_frame"]};
+
+let redirecting = false;
+
+
+/**
+ * Main
+ */
+
+listenerReload();
+
+proxy.runtime.onMessage.addListener(message => {
+    switch(message) {
+        case "targetListUpdated":
+            listenerReload();
+            break;
+        default:
+            console.warn("unknown message");
+    }
+});
+
+proxy.webRequest.onBeforeRedirect.addListener(
+    () => redirecting = true,
+    requestFilter
+);
+
+proxy.webRequest.onBeforeSendHeaders.addListener(
+    () => redirecting = false,
+    requestFilter
+);
+
+
+/*****
+ * Functions
+ */
 
 function listenerReload() {
     getData({blocklist: "", whitelist: ""})
@@ -39,14 +65,15 @@ function listenerReload() {
     });
 }
 
-proxy.runtime.onMessage.addListener(message => {
-    switch(message) {
-        case "targetListUpdated":
-            listenerReload();
-            break;
-        default:
-            console.warn("unknown message");
+function onBeforeRequestListener(details) {
+    if(redirecting) {
+        redirecting = false;
+        return {cancel: false};
     }
-});
+    if(window.whitelist.some(pattern => pattern.test(details.url))) return {cancel: false};
 
-listenerReload();
+    return confirm("This URL is blocked and not in whitelist.\nSure to go?")
+        ? {cancel: false}
+        : {redirectUrl: proxy.runtime.getURL("options.html?testURL=" + details.url)}
+    ;
+}
