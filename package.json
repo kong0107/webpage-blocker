@@ -18,6 +18,6 @@
   },
   "homepage": "https://github.com/kong0107/search-params-remover#readme",
   "dependencies": {
-    "url-match-pattern": "^1.0.0"
+    "url-match-pattern": "^1.0.1"
   }
 }

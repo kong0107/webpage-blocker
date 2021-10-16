@@ -1,75 +1,89 @@
 "use strict";
 
-$("#saveButton").disabled = true;
+/**
+ * Variables
+ */
+
+const g = document.getElementById.bind(document);
+const
+    blocklistTA = g("blocklist"),
+    whitelistTA = g("whitelist"),
+    saveButton = g("saveButton"),
+    testInput = g("testInput"),
+    testContainer = g("testContainer")
+;
+
+
+/**
+ * Main
+ */
 
 getData({blocklist: "", whitelist: ""})
 .then(storage => {
-    $("#blocklist").value = storage.blocklist;
-    $("#whitelist").value = storage.whitelist;
+    blocklistTA.value = storage.blocklist;
+    whitelistTA.value = storage.whitelist;
     urlTest();
 });
 
-$("#blocklist").addEventListener("input", () => {
-    $("#saveButton").disabled = false;
-    $("#testContainer").style.display = "none";
+blocklistTA.addEventListener("input", () => {
+    saveButton.disabled = false;
+    testContainer.style.display = "none";
 });
 
-$("#whitelist").addEventListener("input", () => {
-    $("#saveButton").disabled = false;
-    $("#testContainer").style.display = "none";
+whitelistTA.addEventListener("input", () => {
+    saveButton.disabled = false;
+    testContainer.style.display = "none";
 });
 
-$("#saveButton").addEventListener("click", () => {
-    $("#blocklist").disabled = true;
-    $("#whitelist").disabled = true;
-    $("#saveButton").disabled = true;
-
-    $("#blocklist").value = arrangePatternList("#blocklist").join("\n");
-    $("#whitelist").value = arrangePatternList("#whitelist").join("\n");
+saveButton.disabled = true;
+saveButton.addEventListener("click", () => {
+    blocklistTA.disabled = true;
+    whitelistTA.disabled = true;
+    saveButton.disabled = true;
 
     setData({
-        blocklist: $("#blocklist").value,
-        whitelist: $("#whitelist").value
+        blocklist: blocklistTA.value = arrangePatternList(blocklistTA).join("\n"),
+        whitelist: whitelistTA.value = arrangePatternList(whitelistTA).join("\n")
     })
     .then(() => {
-        $("#blocklist").disabled = false;
-        $("#whitelist").disabled = false;
-        urlTest();
-        $("#testContainer").style.display = "";
         proxy.runtime.sendMessage("targetListUpdated");
+        blocklistTA.disabled = false;
+        whitelistTA.disabled = false;
+        urlTest();
+        testContainer.style.display = "";
     });
 });
 
-$("#testInput").addEventListener("input", urlTest);
+testInput.addEventListener("input", urlTest);
 
-try {
-    $("#testInput").value = (new URL(document.location)).searchParams.get("testURL");
-    $("#testInput").focus();
+const testURL = (new URL(document.location)).searchParams.get("testURL");
+if(testURL) {
+    testInput.value = testURL;
+    testInput.focus();
 }
-catch(e) {}
 
 
-/*****
+/**
  * Functions
  */
 
 function urlTest() {
     let result;
-    let url = $("#testInput").value.trim();
+    let url = testInput.value.trim();
 
     if(!url) return setResult();
 
     try      { url = new URL(url); }
     catch(e) { return setResult("invalid url"); }
 
-    arrangePatternList("#blocklist").some(pattern => {
+    arrangePatternList(blocklistTA).some(pattern => {
         if(!URLMatchPattern.test(pattern, url)) return false;
         result = "blocked by " + pattern;
         return true;
     });
     if(!result) return setResult("not blocked");
 
-    arrangePatternList("#whitelist").some(pattern => {
+    arrangePatternList(blocklistTA).some(pattern => {
         if(!URLMatchPattern.test(pattern, url)) return false;
         result = "allowed by " + pattern;
         return true;
@@ -77,8 +91,8 @@ function urlTest() {
     setResult(result);
 }
 
-function arrangePatternList(selector) {
-    return $(selector).value
+function arrangePatternList(textarea) {
+    return textarea.value
         .split("\n")
         .map(s => s.trim())
         .filter(p => URLMatchPattern.test(p))
@@ -86,5 +100,5 @@ function arrangePatternList(selector) {
 }
 
 function setResult(text = "") {
-    $("#testResult").textContent = text;
+    g("testResult").textContent = text;
 }
