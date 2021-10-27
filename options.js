@@ -25,21 +25,15 @@ getData({blocklist: "", whitelist: ""})
     urlTest();
 });
 
-blocklistTA.addEventListener("input", () => {
-    saveButton.disabled = false;
-    testContainer.style.display = "none";
-});
-
-whitelistTA.addEventListener("input", () => {
-    saveButton.disabled = false;
-    testContainer.style.display = "none";
-});
+blocklistTA.addEventListener("input", onChange);
+whitelistTA.addEventListener("input", onChange);
 
 saveButton.disabled = true;
 saveButton.addEventListener("click", () => {
     blocklistTA.disabled = true;
     whitelistTA.disabled = true;
     saveButton.disabled = true;
+    saveButton.textContent = "Saving";
 
     setData({
         blocklist: blocklistTA.value = arrangePatternList(blocklistTA).join("\n"),
@@ -49,6 +43,7 @@ saveButton.addEventListener("click", () => {
         proxy.runtime.sendMessage("targetListUpdated");
         blocklistTA.disabled = false;
         whitelistTA.disabled = false;
+        saveButton.textContent = "Saved";
         urlTest();
         testContainer.style.display = "";
     });
@@ -67,6 +62,12 @@ if(testURL) {
  * Functions
  */
 
+function onChange() {
+    saveButton.disabled = false;
+    saveButton.textContent = "Save";
+    testContainer.style.display = "none";
+}
+
 function urlTest() {
     let result;
     let url = testInput.value.trim();
@@ -83,7 +84,7 @@ function urlTest() {
     });
     if(!result) return setResult("not blocked");
 
-    arrangePatternList(blocklistTA).some(pattern => {
+    arrangePatternList(whitelistTA).some(pattern => {
         if(!URLMatchPattern.test(pattern, url)) return false;
         result = "allowed by " + pattern;
         return true;

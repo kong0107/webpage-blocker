@@ -4,7 +4,7 @@
  * Variables
  */
 
-const requestFilter = {urls: [], types: ["main_frame"]};
+const requestFilter = {urls: ["*://*/*"], types: ["main_frame"]};
 
 let redirecting = false;
 
@@ -72,7 +72,7 @@ function onBeforeRequestListener(details) {
     }
     if(window.whitelist.some(pattern => pattern.test(details.url))) return {cancel: false};
 
-    return confirm("This URL is blocked and not in whitelist.\nSure to go?")
+    return confirm("This URL is blocked and not in whitelist.\nSure to go?\n" + details.url)
         ? {cancel: false}
         : {redirectUrl: proxy.runtime.getURL("options.html?testURL=" + details.url)}
     ;

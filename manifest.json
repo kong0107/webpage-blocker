@@ -27,5 +27,6 @@
             "background.js"
         ],
         "persistent": true
-    }
+    },
+    "web_accessible_resources": ["options.html"]
 }
